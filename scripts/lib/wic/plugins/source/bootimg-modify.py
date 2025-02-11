@@ -102,66 +102,6 @@ class BootimgModify(SourcePlugin):
             else:
                 cls.install_task.append((src, dst))
 
-        if source_params.get('loader') != "u-boot":
-            return
-
-        configfile = cr.ks.bootloader.configfile
-        custom_cfg = None
-        if configfile:
-            custom_cfg = get_custom_config(configfile)
-            if custom_cfg:
-                # Use a custom configuration for extlinux.conf
-                extlinux_conf = custom_cfg
-                logger.debug("Using custom configuration file "
-                             "%s for extlinux.conf", configfile)
-            else:
-                raise WicError("configfile is specified but failed to "
-                               "get it from %s." % configfile)
-
-        if not custom_cfg:
-            # The kernel types supported by the sysboot of u-boot
-            kernel_types = ["zImage", "Image", "fitImage", "uImage", "vmlinux"]
-            has_dtb = False
-            fdt_dir = '/'
-            kernel_name = None
-
-            # Find the kernel image name, from the highest precedence to lowest
-            for image in kernel_types:
-                for task in cls.install_task:
-                    src, dst = task
-                    if re.match(image, src):
-                        kernel_name = os.path.join('/', dst)
-                        break
-                if kernel_name:
-                    break
-
-            for task in cls.install_task:
-                src, dst = task
-                # We suppose that all the dtb are in the same directory
-                if re.search(r'\.dtb', src) and fdt_dir == '/':
-                    has_dtb = True
-                    fdt_dir = os.path.join(fdt_dir, os.path.dirname(dst))
-                    break
-
-            if not kernel_name:
-                raise WicError('No kernel file found')
-
-            # Compose the extlinux.conf
-            extlinux_conf = "default Yocto\n"
-            extlinux_conf += "label Yocto\n"
-            extlinux_conf += "   kernel %s\n" % kernel_name
-            if has_dtb:
-                extlinux_conf += "   fdtdir %s\n" % fdt_dir
-            bootloader = cr.ks.bootloader
-            extlinux_conf += "append root=%s rootwait %s\n" \
-                             % (cr.rootdev, bootloader.append if bootloader.append else '')
-
-        install_cmd = "install -d %s/extlinux/" % hdddir
-        exec_cmd(install_cmd)
-        cfg = open("%s/extlinux/extlinux.conf" % hdddir, "w")
-        cfg.write(extlinux_conf)
-        cfg.close()
-
 
     @classmethod
     def do_prepare_partition(cls, part, source_params, cr, cr_workdir,
