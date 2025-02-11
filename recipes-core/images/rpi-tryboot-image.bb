@@ -11,7 +11,6 @@ IMAGE_FEATURES += " \
 IMAGE_INSTALL += " \
     rpi-eeprom \
     raspi-gpio \
-    bcm2835 \
     pi-blaster \
     linux-firmware \
 "
