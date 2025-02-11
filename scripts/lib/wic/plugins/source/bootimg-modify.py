@@ -199,20 +199,21 @@ class BootimgModify(SourcePlugin):
         if not os.path.exists(cmdline_path):
             raise FileNotFoundError(f"cmdline.txt not found in {hdddir}")
 
-        # Determine which partition we are processing
-        partition_name = part.mountpoint[-1]  # Extract number from bootA/bootB
-        new_root = 5 if partition_name == 'A' else 6  # Set correct root partition
+        # Read new_root argument from WKS file
+        new_root = source_params.get("root")
+        if not new_root:
+            raise ValueError(f"Missing 'root' argument in partition {part.mountpoint}")
 
         # Modify cmdline.txt
         with open(cmdline_path, "r") as f:
             cmdline = f.read()
 
-        new_cmdline = cmdline.replace("root=/dev/mmcblk0p2", f"root=/dev/mmcblk0p{new_root}")
+        new_cmdline = cmdline.replace("root=/dev/mmcblk0p2", f"root={new_root}")
 
         with open(cmdline_path, "w") as f:
             f.write(new_cmdline)
 
-        print(f"Updated {cmdline_path} to root=/dev/mmcblk0p{new_root}")
+        print(f"Updated {cmdline_path} to root={new_root}")
 
 
 
