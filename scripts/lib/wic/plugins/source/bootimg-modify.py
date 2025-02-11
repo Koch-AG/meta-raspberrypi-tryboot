@@ -45,22 +45,7 @@ class BootimgModify(SourcePlugin):
         install_cmd = "install -d %s" % hdddir
         exec_cmd(install_cmd)
 
-        if not kernel_dir:
-            kernel_dir = get_bitbake_var("DEPLOY_DIR_IMAGE")
-            if not kernel_dir:
-                raise WicError("Couldn't find DEPLOY_DIR_IMAGE, exiting")
-
-        boot_files = None
-        for (fmt, id) in (("_uuid-%s", part.uuid), ("_label-%s", part.label), (None, None)):
-            if fmt:
-                var = fmt % id
-            else:
-                var = ""
-
-            boot_files = get_bitbake_var(cls.image_boot_files_var_name + var)
-            if boot_files is not None:
-                break
-
+        boot_files = get_bitbake_var(cls.image_boot_files_var_name)
         if boot_files is None:
             raise WicError('No boot files defined, %s unset for entry #%d' % (cls.image_boot_files_var_name, part.lineno))
 
