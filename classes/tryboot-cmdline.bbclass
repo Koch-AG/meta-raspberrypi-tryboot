@@ -2,9 +2,9 @@
 def get_wic_image(d):
     import os
 
-    deploy_dir = d.getVar("DEPLOY_DIR_IMAGE")
+    work_dir = d.getVar("WORKDIR")
     image_link_name = d.getVar("IMAGE_NAME")
-    wic_image = os.path.join(deploy_dir, f"{image_link_name}.wic")
+    wic_image = os.path.join(work_dir, "deploy-" + d.getVar("PN") + "-image-complete", f"{image_link_name}.wic")
 
     if not os.path.exists(wic_image):
         bb.fatal(f"No WIC image found! {wic_image}")
@@ -50,5 +50,5 @@ python do_update_tryboot_cmdline() {
     update_cmdline(vfat_partitions[2], "/dev/mmcblk0p6")
 }
 
-addtask do_update_tryboot_cmdline after do_image_complete before do_build
+addtask do_update_tryboot_cmdline after do_image_wic before do_image_complete
 
