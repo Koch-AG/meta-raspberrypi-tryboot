@@ -41,6 +41,13 @@ def update_cmdline(partition, root):
         "mcopy", "-Do", "-i", partition, "-", "::cmdline.txt"
     ], input=new_cmdline, text=True, check=True)
 
+def update_bmap(wic_image):
+    import subprocess
+
+    bmap_file = f"{wic_image}.bmap"
+
+    subprocess.run(["bmaptool", "create", "-o", bmap_file, wic_image], check=True)
+    bb.note(f"Updated BMAP file created: {bmap_file}")
 
 python do_update_tryboot_cmdline() {
     wic_image = get_wic_image(d)
@@ -48,6 +55,8 @@ python do_update_tryboot_cmdline() {
 
     update_cmdline(vfat_partitions[1], "/dev/mmcblk0p5")
     update_cmdline(vfat_partitions[2], "/dev/mmcblk0p6")
+
+    update_bmap(wic_image)
 }
 
 addtask do_update_tryboot_cmdline after do_image_wic before do_image_complete
